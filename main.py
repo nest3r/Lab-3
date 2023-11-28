@@ -1,59 +1,59 @@
 import tkinter as tk
-from tkinter import messagebox
-from sqrEq import sqrEquation
+import random
+from PIL import Image, ImageTk
 
+def generate_key(input_number):
+    key = ''
+    characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    shift_direction = 1
 
-def close():
-    window.destroy()
+    for i in range(4):
+        block = ''.join(random.choices(characters, k=5))
+        key += block
+        if i < 3:
+            key += '-'
 
+        shift = int(input_number % 10)
+        input_number //= 10
+        block = list(block)
+        for j in range(shift):
+            if shift_direction == 1:
+                block = [block[-1]] + block[:-1]
+            else:
+                block = block[1:] + [block[0]]
+        key += ''.join(block) 
+        shift_direction *= -1 
 
-def calc():
-    A = float(arg_A.get())
-    B = float(arg_B.get())
-    C = float(arg_C.get())
-    if A == 0.0:
-        tk.messagebox.showwarning('Error', 'Division by zero!')
-    else:
-        lbl_result.configure(text=sqrEquation(A, B, C))
+    return key
 
+root = tk.Tk()
+root.title("Keygen")
+root.geometry("450x400")
 
-window = tk.Tk()
-window.geometry('576x360')
-bg_img = tk.PhotoImage(file='bg_pic.png')
+background_image = Image.open("bg_pic.jpg")
+background_photo = ImageTk.PhotoImage(background_image)
+background_label = tk.Label(root, image=background_photo)
+background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-lbl_bg = tk.Label(window, image=bg_img)
-lbl_bg.place(x=0, y=0, relwidth=1, relheight=1)
+label = tk.Label(root, text="Введите трехзначное число:")
+label.pack()
+entry = tk.Entry(root)
+entry.pack()
+result_label = tk.Label(root, text="")
+result_label.pack()
 
-frame = tk.Frame(window)
-frame.place(relx=0.5, rely=0.5, anchor='center')
+def generate_button_click():
+    try:
+        input_number = int(entry.get())
+        if 100 <= input_number <= 999:
+            key = generate_key(input_number)
+            result_label.config(text="Сгенерированный ключ: " + key)
+        else:
+            result_label.config(text="Пожалуйста, введите трехзначное число.")
+    except ValueError:
+        result_label.config(text="Пожалуйста, введите корректное число.")
 
-lbl_A = tk.Label(frame, text='A', font=('Arial', 30), bg='blue', fg='white')
-lbl_A.grid(column=0, row=0, padx=10, pady=15)
-arg_A = tk.Entry(frame, width=10)
-arg_A.insert(0, '1')
-arg_A.grid(column=0, row=1, padx=10, pady=15)
+generate_button = tk.Button(root, text="Сгенерировать", command=generate_button_click)
+generate_button.pack()
 
-lbl_B = tk.Label(frame, text='B', font=('Arial', 30))
-lbl_B.grid(column=1, row=0, padx=10, pady=15)
-arg_B = tk.Entry(frame, width=10)
-arg_B.insert(0, '0')
-arg_B.grid(column=1, row=1, padx=10, pady=15)
-
-lbl_C = tk.Label(frame, text='C', font=('Arial', 30))
-lbl_C.grid(column=2, row=0, padx=10, pady=15)
-arg_C = tk.Entry(frame, width=10)
-arg_C.insert(0, '0')
-arg_C.grid(column=2, row=1, padx=10, pady=15)
-
-lbl_roots = tk.Label(frame, text='Result:')
-lbl_roots.grid(column=1, row=2)
-lbl_result = tk.Label(frame, text='None yet.', font=('Arial', 10))
-lbl_result.grid(column=2, row=2)
-
-btn_calc = tk.Button(frame, text='Calculate', command=calc)
-btn_calc.grid(column=0, row=3, padx=10, pady=15)
-btn_exit = tk.Button(frame, text='Cancel', command=close)
-btn_exit.grid(column=2, row=3, padx=10, pady=15)
-
-
-window.mainloop()
+root.mainloop()
